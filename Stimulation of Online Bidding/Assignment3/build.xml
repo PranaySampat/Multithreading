@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="run" name="Assignment3">
+	<property environment="env" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.8" />
+	<property name="source" value="1.8" />
+	<path id="JUnit 4.libraryclasspath">
+		<pathelement location="lib/junit.jar" />
+		<pathelement location="lib/org.hamcrest.core_1.3.0.v201303031735.jar" />
+	</path>
+	<path id="Assignment3.classpath">
+		<pathelement location="bin" />
+		<path refid="JUnit 4.libraryclasspath" />
+	</path>
+	<target name="init">
+		<mkdir dir="bin" />
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="src">
+				<exclude name="*/.launch" />
+				<exclude name="*/.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="bin" />
+	</target>
+	<target depends="clean" name="cleanall" />
+	<target depends="build-subprojects,compile" name="build" />
+	<target name="build-subprojects" />
+	<target depends="init" name="compile">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="builddirectory/classes" includeantruntime="false" source="${source}" target="${target}">
+			<src path="src" />
+			<classpath refid="Assignment3.classpath" />
+		</javac>
+	</target>
+	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects" />
+	<target name="junit">
+		<mkdir dir="${junit.output.dir}" />
+		<junit fork="yes" printsummary="withOutAndErr">
+			<formatter type="xml" />
+			<test name="p1.Simulation" todir="${junit.output.dir}" />
+			<classpath refid="Assignment3.classpath" />
+		</junit>
+	</target>
+	<target name="junitreport">
+		<junitreport todir="${junit.output.dir}">
+			<fileset dir="${junit.output.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${junit.output.dir}" />
+		</junitreport>
+	</target>
+	<target depends="compile" name="jar">
+		<mkdir dir="builddirectory/jar" />
+		<jar destfile="builddirectory/jar/Assignment3.jar" basedir="builddirectory/classes">
+			<manifest>
+				<attribute name="Main-Class" value="p1.Simulation" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target depends="jar" name="run">
+		<java jar="builddirectory/jar/Assignment3.jar" fork="true" />
+	</target>
+</project>
