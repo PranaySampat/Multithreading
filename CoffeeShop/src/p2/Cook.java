@@ -1,0 +1,105 @@
+package p2;
+
+/**
+ * Cooks are simulation actors that have at least one field, a name. When
+ * running, a cook attempts to retrieve outstanding orders placed by Eaters and
+ * process them.
+ */
+public class Cook implements Runnable {
+	private final String name;
+	
+	// private static final Object lockorder = new Object();
+	// public static Helper helper = null;
+	// private Helper helper = null;
+
+	/**
+	 * You can feel free modify this constructor. It must take at least the
+	 * name, but may take other parameters if you would find adding them useful.
+	 *
+	 * @param: the
+	 *             name of the cook
+	 */
+	public Cook(String name) {
+		this.name = name;
+	}
+
+	public String toString() {
+		return name;
+	}
+
+	/**
+	 * This method executes as follows. The cook tries to retrieve orders placed
+	 * by Customers. For each order, a List<Food>, the cook submits each Food
+	 * item in the List to an appropriate Machine, by calling makeFood(). Once
+	 * all machines have produced the desired Food, the order is complete, and
+	 * the Customer is notified. The cook can then go to process the next order.
+	 * If during its execution the cook is interrupted (i.e., some other thread
+	 * calls the interrupt() method on it, which could raise
+	 * InterruptedException if the cook is blocking), then it terminates.
+	 */
+	public void run() {
+		try {
+			while (true) {
+				 int noOfBurgers = 0;
+				 int noOfFries = 0;
+			 int noOfCoffee = 0;
+				synchronized (this) {
+					
+				
+					Helper helper = null;
+					synchronized (Simulation.queueLock) {
+						if (Simulation.getHelperQueue().isEmpty() == false
+								&& !Simulation.getHelperQueue().equals(null)) {
+							helper = Simulation.getHelperQueue().poll();
+						}
+					
+					
+						
+					
+					if (helper != null) {
+						Simulation.logEvent(
+								SimulationEvent.cookReceivedOrder(this, helper.getOrder(), helper.getOrderNumber()));
+						for (Food food : helper.getOrder()) {
+							if (food.equals(FoodType.burger)) {
+								noOfBurgers++;
+							} else if (food.equals(FoodType.fries)) {
+								noOfFries++;
+							} else if (food.equals(FoodType.coffee)) {
+								noOfCoffee++;
+							}
+						}
+						synchronized (Simulation.hashMapLock) {
+							Simulation.totalOrder.put(helper.getOrderNumber(), helper.getOrder().size());
+							if (noOfBurgers > 0) {
+								Simulation.cookBurger(noOfBurgers, helper.getOrderNumber());
+							}
+							if (noOfFries > 0) {
+								Simulation.cookFries(noOfFries, helper.getOrderNumber());
+							}
+							if (noOfCoffee > 0) {
+								Simulation.makeCoffee(noOfCoffee, helper.getOrderNumber());
+							}
+
+						}}
+						
+						while (Simulation.totalOrder.containsKey(helper.getOrderNumber())
+								&& Simulation.totalOrder.get(helper.getOrderNumber()) == 0) {
+							System.out.println("Hello");
+							Simulation.customerOrderStatus.replace(helper.getCustomer(), true);
+							//helper = null;
+							break;
+						
+					}
+					}}}
+				
+			
+		} catch (InterruptedException e) {
+			// This code assumes the provided code in the Simulation class
+			// that interrupts each cook thread when all customers are done.
+			// You might need to change this if you change how things are
+			// done in the Simulation class.
+
+			Simulation.logEvent(SimulationEvent.cookEnding(this));
+		}
+	}
+}
